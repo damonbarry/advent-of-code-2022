@@ -1,37 +1,15 @@
 use std::{cmp, fs};
 
 fn main() {
-    find_the_elf_carrying_the_most_calories();
-    find_the_top_three_elves_carrying_the_most_calories();
+    find_elves_carrying_the_most_calories(1);
+    find_elves_carrying_the_most_calories(3);
 }
 
-fn find_the_elf_carrying_the_most_calories() {
+fn find_elves_carrying_the_most_calories(num: usize) {
     let input = fs::read_to_string("input/day1.txt").unwrap();
 
     let mut lines = input.lines();
-    let mut most = 0u64;
-
-    loop {
-        let calories = lines
-            .by_ref()
-            .take_while(|l| !l.is_empty())
-            .map(|l| l.parse::<u64>().unwrap())
-            .reduce(|acc, cal| acc + cal);
-
-        match calories {
-            Some(c) => most = cmp::max(most, c),
-            None => break,
-        }
-    }
-
-    println!("The elf carrying the most calories has {} calories", most);
-}
-
-fn find_the_top_three_elves_carrying_the_most_calories() {
-    let input = fs::read_to_string("input/day1.txt").unwrap();
-
-    let mut lines = input.lines();
-    let mut top: [u64; 3] = [0; 3];
+    let mut top: Vec<u64> = vec![];
 
     loop {
         let calories = lines
@@ -45,15 +23,16 @@ fn find_the_top_three_elves_carrying_the_most_calories() {
                 let mut temp = Vec::from(top);
                 temp.push(c);
                 temp.sort_unstable_by(|a, b| b.cmp(a));
-                temp.truncate(3);
-                top = temp.try_into().unwrap();
+                temp.truncate(num);
+                top = temp;
             }
             None => break,
         }
     }
 
     println!(
-        "The three elves carrying the most calories have {} calories in total",
-        top.iter().take(3).sum::<u64>()
+        "The {} elves carrying the most calories have {} calories in total",
+        num,
+        top.iter().sum::<u64>()
     );
 }
