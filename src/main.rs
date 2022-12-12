@@ -2,6 +2,7 @@ use std::{cmp, fs};
 
 fn main() {
     find_the_elf_carrying_the_most_calories();
+    find_the_top_three_elves_carrying_the_most_calories();
 }
 
 fn find_the_elf_carrying_the_most_calories() {
@@ -24,4 +25,35 @@ fn find_the_elf_carrying_the_most_calories() {
     }
 
     println!("The elf carrying the most calories has {} calories", most);
+}
+
+fn find_the_top_three_elves_carrying_the_most_calories() {
+    let input = fs::read_to_string("input/day1.txt").unwrap();
+
+    let mut lines = input.lines();
+    let mut top: [u64; 3] = [0; 3];
+
+    loop {
+        let calories = lines
+            .by_ref()
+            .take_while(|l| !l.is_empty())
+            .map(|l| l.parse::<u64>().unwrap())
+            .reduce(|acc, cal| acc + cal);
+
+        match calories {
+            Some(c) => {
+                let mut temp = Vec::from(top);
+                temp.push(c);
+                temp.sort_unstable_by(|a, b| b.cmp(a));
+                temp.truncate(3);
+                top = temp.try_into().unwrap();
+            }
+            None => break,
+        }
+    }
+
+    println!(
+        "The three elves carrying the most calories have {} calories in total",
+        top.iter().take(3).sum::<u64>()
+    );
 }
