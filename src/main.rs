@@ -38,32 +38,47 @@ fn find_elves_carrying_the_most_calories(num: usize) {
     );
 }
 
+enum Move {
+    Rock,
+    Paper,
+    Scissors,
+}
+
+impl Move {
+    fn new(code: &str) -> Self {
+        match code {
+            "A" | "X" => Move::Rock,
+            "B" | "Y" => Move::Paper,
+            "C" | "Z" => Move::Scissors,
+            _ => panic!("Unknown move code '{}'", code),
+        }
+    }
+
+    fn score(&self, other: &Move) -> u64 {
+        match (self, other) {
+            (Move::Rock, Move::Rock) => 1 + 3,         // draw
+            (Move::Rock, Move::Paper) => 1 + 0,        // lose
+            (Move::Rock, Move::Scissors) => 1 + 6,     // win
+            (Move::Paper, Move::Rock) => 2 + 6,        // win
+            (Move::Paper, Move::Paper) => 2 + 3,       // draw
+            (Move::Paper, Move::Scissors) => 2 + 0,    // lose
+            (Move::Scissors, Move::Rock) => 3 + 0,     // lose
+            (Move::Scissors, Move::Paper) => 3 + 6,    // win
+            (Move::Scissors, Move::Scissors) => 3 + 3, // draw
+        }
+    }
+}
+
 fn calculate_rock_paper_scissors_score_for_strategy_guide() {
     let input = fs::read_to_string("input/day2.txt").unwrap();
-    let scores: Vec<u64> = input.lines().map(|l| {
-        let moves : Vec<_> = l.split(' ').collect();
-        let move_scores: Vec<u64> = moves.iter().map(|mv| {
-            match *mv {
-                "A" | "X" => 1,
-                "B" | "Y" => 2,
-                "C" | "Z" => 3,
-                _ => panic!("Unknown move code '{}'", mv),
-            }
-        }).collect();
+    let score: u64 = input
+        .lines()
+        .map(|line| {
+            let moves: Vec<_> = line.split(' ').map(|code| Move::new(code)).collect();
+            assert_eq!(moves.len(), 2);
+            moves[1].score(&moves[0])
+        })
+        .sum();
 
-        match (move_scores[0], move_scores[1]) {
-            (1, 1) => 1 + 3, // Rock vs rock, draw
-            (1, 2) => 2 + 6, // Rock vs paper, win
-            (1, 3) => 3 + 0, // Rock vs scissors, lose
-            (2, 1) => 1 + 0, // Paper vs rock, lose
-            (2, 2) => 2 + 3, // Paper vs paper, draw
-            (2, 3) => 3 + 6, // Paper vs scissors, win
-            (3, 1) => 1 + 6, // Scissors vs rock, win
-            (3, 2) => 2 + 0, // Scissors vs paper, lose
-            (3, 3) => 3 + 3, // Scissors vs scissors, draw
-            _ => panic!("Unknown round combo '{:?}'", (move_scores[0], move_scores[1])),
-        }
-    }).collect();
-
-    println!("I followed the strategy guide. My score is {}", scores.iter().sum::<u64>());
+    println!("I followed the strategy guide. My score is {}", score);
 }
