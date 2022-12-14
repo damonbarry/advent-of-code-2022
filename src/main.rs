@@ -86,33 +86,20 @@ fn calculate_rock_paper_scissors_score_for_strategy_guide() {
 
 fn calculate_rock_paper_scissors_score_for_corrected_strategy_guide() {
     let input = fs::read_to_string("input/day2.txt").unwrap();
-    let scores: Vec<u64> = input.lines().map(|l| {
-        let encoded : Vec<_> = l.split(' ').collect();
-        let decoded: Vec<u64> = encoded.iter().map(|mv| {
-            match *mv {
-                "A" => 1,
-                "B" => 2,
-                "C" => 3,
-                "X" => 0,
-                "Y" => 3,
-                "Z" => 6,
-                _ => panic!("Unknown code '{}'", mv),
-            }
-        }).collect();
-
-        match (decoded[0], decoded[1]) {
-            (1, 0) => 3 + 0, // Rock, lose => scissors
-            (1, 3) => 1 + 3, // Rock, draw => rock
-            (1, 6) => 2 + 6, // Rock, win => paper
-            (2, 0) => 1 + 0, // Paper, lose => rock
-            (2, 3) => 2 + 3, // Paper, draw => paper
-            (2, 6) => 3 + 6, // Paper, win => scissors
-            (3, 0) => 2 + 0, // Scissors, lose => paper
-            (3, 3) => 3 + 3, // Scissors, draw => scissors
-            (3, 6) => 1 + 6, // Scissors, win => rock
-            _ => panic!("Unknown round combo '{:?}'", (decoded[0], decoded[1])),
+    let score: u64 = input.lines().map(|l| {
+        match l {
+            "A X" => 3 + 0, // Rock, lose => scissors
+            "A Y" => 1 + 3, // Rock, draw => rock
+            "A Z" => 2 + 6, // Rock, win => paper
+            "B X" => 1 + 0, // Paper, lose => rock
+            "B Y" => 2 + 3, // Paper, draw => paper
+            "B Z" => 3 + 6, // Paper, win => scissors
+            "C X" => 2 + 0, // Scissors, lose => paper
+            "C Y" => 3 + 3, // Scissors, draw => scissors
+            "C Z" => 1 + 6, // Scissors, win => rock
+            _ => panic!("Unknown round combo '{}'", l),
         }
-    }).collect();
+    }).sum();
 
-    println!("I followed the (corrected) strategy guide. My score is {}", scores.iter().sum::<u64>());
+    println!("I followed the (corrected) strategy guide. My score is {}", score);
 }
