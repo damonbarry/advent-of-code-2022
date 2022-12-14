@@ -5,6 +5,7 @@ fn main() {
     find_elves_carrying_the_most_calories(3);
     calculate_rock_paper_scissors_score_for_strategy_guide();
     calculate_rock_paper_scissors_score_for_corrected_strategy_guide();
+    sum_rucksack_item_type_priorities();
 }
 
 fn find_elves_carrying_the_most_calories(num: usize) {
@@ -102,4 +103,29 @@ fn calculate_rock_paper_scissors_score_for_corrected_strategy_guide() {
     }).sum();
 
     println!("I followed the (corrected) strategy guide. My score is {}", score);
+}
+
+fn sum_rucksack_item_type_priorities() {
+    let input = fs::read_to_string("input/day3.txt").unwrap();
+    let mut priority_sum = 0u64;
+    for line in input.lines() {
+        let compartment_size = line.len() / 2;
+        let mut inventory = [false; 52];
+        for (i, item) in line.chars().enumerate() {
+            let item = match item {
+                c if c.is_ascii_lowercase() => c as u32 - 'a' as u32,
+                c if c.is_ascii_uppercase() => c as u32 - 'A' as u32 + 26,
+                _ => panic!("Invalid rucksack item type '{}'", item),
+            };
+            match i {
+                i if i < compartment_size => inventory[item as usize] = true,
+                _ => if inventory[item as usize] {
+                    priority_sum += item as u64 + 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    println!("Sum of rucksack item type priorities is {}", priority_sum);
 }
