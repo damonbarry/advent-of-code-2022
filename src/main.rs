@@ -6,6 +6,7 @@ fn main() {
     calculate_rock_paper_scissors_score_for_strategy_guide();
     calculate_rock_paper_scissors_score_for_corrected_strategy_guide();
     sum_rucksack_item_type_priorities();
+    sum_group_item_type_priorities();
 }
 
 fn find_elves_carrying_the_most_calories(num: usize) {
@@ -128,4 +129,34 @@ fn sum_rucksack_item_type_priorities() {
     }
 
     println!("Sum of rucksack item type priorities is {}", priority_sum);
+}
+
+fn sum_group_item_type_priorities() {
+    let mut priority_sum = 0u64;
+    let input = fs::read_to_string("input/day3.txt").unwrap();
+    for group in input.lines().collect::<Vec<_>>().as_slice().chunks(3) {
+        let mut inventories = [[false; 52]; 3];
+        for (i, rucksack) in group.iter().enumerate() {
+            for item in rucksack.chars() {
+                let item = match item {
+                    c if c.is_ascii_lowercase() => c as u32 - 'a' as u32,
+                    c if c.is_ascii_uppercase() => c as u32 - 'A' as u32 + 26,
+                    _ => panic!("Invalid rucksack item type '{}'", item),
+                };
+
+                inventories[i][item as usize] = true;
+            }
+        }
+
+        let mut group_item = 0usize;
+        for n in 0..52 {
+            if inventories[0][n] == true && inventories[1][n] == true && inventories[2][n] == true {
+                group_item = n + 1;
+            }
+        }
+
+        priority_sum += group_item as u64;
+    }
+
+    println!("Sum of group item type priorities is {}", priority_sum);
 }
