@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, ops};
 
 fn main() {
     find_elves_carrying_the_most_calories(1);
@@ -171,34 +171,60 @@ fn sum_group_item_type_priorities() {
     println!("Sum of group item type priorities is {}", priority_sum);
 }
 
+struct AssignmentPair {
+    left: ops::RangeInclusive<usize>,
+    right: ops::RangeInclusive<usize>,
+}
+
+impl AssignmentPair {
+    pub fn is_fully_contained(&self) -> bool {
+        matches!(
+            self.left.clone().all(|n| self.right.clone().contains(&n))
+                || self.right.clone().all(|n| self.left.clone().contains(&n)),
+            true
+        )
+    }
+
+    pub fn overlaps(&self) -> bool {
+        matches!(
+            self.left.clone().any(|n| self.right.clone().contains(&n)),
+            true
+        )
+    }
+}
+
+impl std::str::FromStr for AssignmentPair {
+    type Err = ();
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let assignments: Vec<_> = value
+            .split(',')
+            .map(|assign| {
+                let bounds: Vec<_> = assign
+                    .split('-')
+                    .map(|n| n.parse::<usize>().unwrap())
+                    .collect();
+                assert_eq!(bounds.len(), 2);
+                bounds[0]..=bounds[1]
+            })
+            .collect();
+        assert_eq!(assignments.len(), 2);
+        Ok(AssignmentPair {
+            left: assignments[0].clone(),
+            right: assignments[1].clone(),
+        })
+    }
+}
+
 fn sum_assignments_contained_in_pair_assignment() {
     let input = fs::read_to_string("input/day4.txt").unwrap();
     let count = input
         .lines()
         .filter_map(|l| {
-            let elves: Vec<_> = l.split(',').collect();
-            assert_eq!(elves.len(), 2);
-
-            let ranges: Vec<_> = elves
-                .iter()
-                .map(|elf| {
-                    let range: Vec<_> = elf
-                        .split('-')
-                        .map(|n| n.parse::<usize>().unwrap())
-                        .collect();
-                    assert_eq!(range.len(), 2);
-                    range[0]..=range[1]
-                })
-                .collect();
-
-            let (left, right) = (&ranges[0], &ranges[1]);
-
-            match left.clone().all(|n| right.clone().contains(&n))
-                || right.clone().all(|n| left.clone().contains(&n))
-            {
-                true => Some(l),
-                false => None,
-            }
+            l.parse::<AssignmentPair>()
+                .unwrap()
+                .is_fully_contained()
+                .then_some(l)
         })
         .count();
 
@@ -212,29 +238,7 @@ fn sum_overlapping_pair_assignments() {
     let input = fs::read_to_string("input/day4.txt").unwrap();
     let count = input
         .lines()
-        .filter_map(|l| {
-            let elves: Vec<_> = l.split(',').collect();
-            assert_eq!(elves.len(), 2);
-
-            let ranges: Vec<_> = elves
-                .iter()
-                .map(|elf| {
-                    let range: Vec<_> = elf
-                        .split('-')
-                        .map(|n| n.parse::<usize>().unwrap())
-                        .collect();
-                    assert_eq!(range.len(), 2);
-                    range[0]..=range[1]
-                })
-                .collect();
-
-            let (left, right) = (&ranges[0], &ranges[1]);
-
-            match left.clone().any(|n| right.clone().contains(&n)) {
-                true => Some(l),
-                false => None,
-            }
-        })
+        .filter_map(|l| l.parse::<AssignmentPair>().unwrap().overlaps().then_some(l))
         .count();
 
     println!(
