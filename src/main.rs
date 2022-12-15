@@ -8,6 +8,7 @@ fn main() {
     sum_rucksack_item_type_priorities();
     sum_group_item_type_priorities();
     sum_assignments_contained_in_pair_assignment();
+    sum_overlapping_pair_assignments();
 }
 
 fn find_elves_carrying_the_most_calories(num: usize) {
@@ -203,6 +204,41 @@ fn sum_assignments_contained_in_pair_assignment() {
 
     println!(
         "Found {} assignment pairs in which one range fully contains the other",
+        count
+    );
+}
+
+fn sum_overlapping_pair_assignments() {
+    let input = fs::read_to_string("input/day4.txt").unwrap();
+    let count = input
+        .lines()
+        .filter_map(|l| {
+            let elves: Vec<_> = l.split(',').collect();
+            assert_eq!(elves.len(), 2);
+
+            let ranges: Vec<_> = elves
+                .iter()
+                .map(|elf| {
+                    let range: Vec<_> = elf
+                        .split('-')
+                        .map(|n| n.parse::<usize>().unwrap())
+                        .collect();
+                    assert_eq!(range.len(), 2);
+                    range[0]..=range[1]
+                })
+                .collect();
+
+            let (left, right) = (&ranges[0], &ranges[1]);
+
+            match left.clone().any(|n| right.clone().contains(&n)) {
+                true => Some(l),
+                false => None,
+            }
+        })
+        .count();
+
+    println!(
+        "Found {} assignment pairs in which the ranges overlap",
         count
     );
 }
