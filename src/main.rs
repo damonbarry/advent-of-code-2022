@@ -89,22 +89,28 @@ fn calculate_rock_paper_scissors_score_for_strategy_guide() {
 
 fn calculate_rock_paper_scissors_score_for_corrected_strategy_guide() {
     let input = fs::read_to_string("input/day2.txt").unwrap();
-    let score: u64 = input.lines().map(|l| {
-        match l {
-            "A X" => 3 + 0, // Rock, lose => scissors
-            "A Y" => 1 + 3, // Rock, draw => rock
-            "A Z" => 2 + 6, // Rock, win => paper
-            "B X" => 1 + 0, // Paper, lose => rock
-            "B Y" => 2 + 3, // Paper, draw => paper
-            "B Z" => 3 + 6, // Paper, win => scissors
-            "C X" => 2 + 0, // Scissors, lose => paper
-            "C Y" => 3 + 3, // Scissors, draw => scissors
-            "C Z" => 1 + 6, // Scissors, win => rock
-            _ => panic!("Unknown round combo '{}'", l),
-        }
-    }).sum();
+    let score: u64 = input
+        .lines()
+        .map(|l| {
+            match l {
+                "A X" => 3 + 0, // Rock, lose => scissors
+                "A Y" => 1 + 3, // Rock, draw => rock
+                "A Z" => 2 + 6, // Rock, win => paper
+                "B X" => 1 + 0, // Paper, lose => rock
+                "B Y" => 2 + 3, // Paper, draw => paper
+                "B Z" => 3 + 6, // Paper, win => scissors
+                "C X" => 2 + 0, // Scissors, lose => paper
+                "C Y" => 3 + 3, // Scissors, draw => scissors
+                "C Z" => 1 + 6, // Scissors, win => rock
+                _ => panic!("Unknown round combo '{}'", l),
+            }
+        })
+        .sum();
 
-    println!("I followed the (corrected) strategy guide. My score is {}", score);
+    println!(
+        "I followed the (corrected) strategy guide. My score is {}",
+        score
+    );
 }
 
 fn sum_rucksack_item_type_priorities() {
@@ -121,9 +127,11 @@ fn sum_rucksack_item_type_priorities() {
             };
             match i {
                 i if i < compartment_size => inventory[item as usize] = true,
-                _ => if inventory[item as usize] {
-                    priority_sum += item as u64 + 1;
-                    break;
+                _ => {
+                    if inventory[item as usize] {
+                        priority_sum += item as u64 + 1;
+                        break;
+                    }
                 }
             }
         }
@@ -164,23 +172,37 @@ fn sum_group_item_type_priorities() {
 
 fn sum_assignments_contained_in_pair_assignment() {
     let input = fs::read_to_string("input/day4.txt").unwrap();
-    let count = input.lines().filter_map(|l| {
-        let elves: Vec<_> = l.split(',').collect();
-        assert_eq!(elves.len(), 2);
+    let count = input
+        .lines()
+        .filter_map(|l| {
+            let elves: Vec<_> = l.split(',').collect();
+            assert_eq!(elves.len(), 2);
 
-        let ranges: Vec<_> = elves.iter().map(|elf| {
-            let range: Vec<_> = elf.split('-').map(|n| n.parse::<usize>().unwrap()).collect();
-            assert_eq!(range.len(), 2);
-            range[0]..=range[1]
-        }).collect();
+            let ranges: Vec<_> = elves
+                .iter()
+                .map(|elf| {
+                    let range: Vec<_> = elf
+                        .split('-')
+                        .map(|n| n.parse::<usize>().unwrap())
+                        .collect();
+                    assert_eq!(range.len(), 2);
+                    range[0]..=range[1]
+                })
+                .collect();
 
-        let (left, right) = (&ranges[0], &ranges[1]);
+            let (left, right) = (&ranges[0], &ranges[1]);
 
-        match left.clone().all(|n| right.clone().contains(&n)) || right.clone().all(|n| left.clone().contains(&n)) {
-            true => Some(l),
-            false => None,
-        }
-    }).count();
+            match left.clone().all(|n| right.clone().contains(&n))
+                || right.clone().all(|n| left.clone().contains(&n))
+            {
+                true => Some(l),
+                false => None,
+            }
+        })
+        .count();
 
-    println!("Found {} assignment pairs in which one range fully contains the other", count);
+    println!(
+        "Found {} assignment pairs in which one range fully contains the other",
+        count
+    );
 }
