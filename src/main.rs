@@ -9,7 +9,8 @@ fn main() {
     sum_group_item_type_priorities();
     sum_assignments_contained_in_pair_assignment();
     sum_overlapping_pair_assignments();
-    get_top_crates_after_rearrangement();
+    get_top_crates_after_rearrangement_9000();
+    get_top_crates_after_rearrangement_9001();
 }
 
 fn find_elves_carrying_the_most_calories(num: usize) {
@@ -248,7 +249,7 @@ fn sum_overlapping_pair_assignments() {
     );
 }
 
-fn get_top_crates_after_rearrangement() {
+fn get_top_crates_after_rearrangement_9000() {
     let input = fs::read_to_string("input/day5.txt").unwrap();
     let lines = input.lines();
 
@@ -285,6 +286,64 @@ fn get_top_crates_after_rearrangement() {
                     let ch = stacks[src_stack - 1].pop().unwrap();
                     stacks[dst_stack - 1].push(ch);
                 }
+            },
+            _ if !init => {
+                // stacks were built in reverse; fix them
+                for i in 0..stacks.len() {
+                    stacks[i] = stacks[i].chars().rev().collect::<String>();
+                }
+
+                init = true;
+            },
+            _ => (),
+        }
+    }
+
+    // get the top crate from each stack
+    let mut top = "".to_string();
+    for stack in stacks {
+        top.push(stack.chars().last().unwrap());
+    }
+
+    println!("After rearrangement, the crates on top of each stack are {}", top);
+}
+
+fn get_top_crates_after_rearrangement_9001() {
+    let input = fs::read_to_string("input/day5.txt").unwrap();
+    let lines = input.lines();
+
+    // parse starting arrangement
+    let mut init = false;
+    let mut stacks = vec![];
+
+    for line in lines {
+        match line {
+            l if l.trim_start().starts_with("[") => {
+                for i in (0..l.len()).step_by(4) {
+                    if stacks.len() < i / 4 + 1 {
+                        stacks.push("".to_string());
+                    }
+
+                    let id = (&l[i+1..i+2]).trim();
+                    if !id.is_empty() {
+                        stacks[i / 4] += id;
+                    }
+                }
+            },
+            l if l.trim_start().starts_with("move") => {
+                // parse instructions
+                let tokens: Vec<_> = l.split_ascii_whitespace().collect();
+                assert_eq!(tokens[0], "move");
+                let num_crates: usize = tokens[1].parse().unwrap();
+                assert_eq!(tokens[2], "from");
+                let src_stack: usize = tokens[3].parse().unwrap();
+                assert_eq!(tokens[4], "to");
+                let dst_stack: usize = tokens[5].parse().unwrap();
+
+                // perform instructions
+                let stack = &mut stacks[src_stack - 1];
+                let crates: String = stack.drain((stack.len() - num_crates)..).collect();
+                stacks[dst_stack - 1] += &crates;
             },
             _ if !init => {
                 // stacks were built in reverse; fix them
