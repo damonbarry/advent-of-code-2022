@@ -368,10 +368,10 @@ fn get_top_crates_after_rearrangement_9001() {
     println!("After rearrangement, the crates on top of each stack are {}", top);
 }
 
-fn find_start_of_packet_marker() {
+fn find_start_marker(size: usize) -> Result<usize, ()> {
     let input = fs::read_to_string("input/day6.txt").unwrap();
     let stream = input.as_bytes().to_vec();
-    for (i, marker) in stream.windows(4).enumerate() {
+    for (i, marker) in stream.windows(size).enumerate() {
         let mut marker = marker.to_vec();
         marker.sort();
         let ch = marker.iter().reduce(|last, ch| {
@@ -381,27 +381,19 @@ fn find_start_of_packet_marker() {
             }
         }).unwrap();
         if *ch != 0 {
-            println!("Found start-of-packet marker at {}", i + 4);
-            break;
+            return Ok(i + size);
         }
     }
+
+    Err(())
+}
+
+fn find_start_of_packet_marker() {
+    let pos = find_start_marker(4).unwrap();
+    println!("Found start-of-packet marker at {}", pos);
 }
 
 fn find_start_of_message_marker() {
-    let input = fs::read_to_string("input/day6.txt").unwrap();
-    let stream = input.as_bytes().to_vec();
-    for (i, marker) in stream.windows(14).enumerate() {
-        let mut marker = marker.to_vec();
-        marker.sort();
-        let ch = marker.iter().reduce(|last, ch| {
-            match last {
-                i if i == &0 || i == ch => &0,
-                _ => ch,
-            }
-        }).unwrap();
-        if *ch != 0 {
-            println!("Found start-of-packet marker at {}", i + 14);
-            break;
-        }
-    }
+    let pos = find_start_marker(14).unwrap();
+    println!("Found start-of-message marker at {}", pos);
 }
