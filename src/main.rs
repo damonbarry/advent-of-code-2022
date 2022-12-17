@@ -11,6 +11,7 @@ fn main() {
     sum_overlapping_pair_assignments();
     get_top_crates_after_rearrangement_9000();
     get_top_crates_after_rearrangement_9001();
+    find_start_of_packet_marker();
 }
 
 fn find_elves_carrying_the_most_calories(num: usize) {
@@ -364,4 +365,23 @@ fn get_top_crates_after_rearrangement_9001() {
     }
 
     println!("After rearrangement, the crates on top of each stack are {}", top);
+}
+
+fn find_start_of_packet_marker() {
+    let input = fs::read_to_string("input/day6.txt").unwrap();
+    let stream = input.as_bytes().to_vec();
+    for (i, marker) in stream.windows(4).enumerate() {
+        let mut marker = marker.to_vec();
+        marker.sort();
+        let ch = marker.iter().reduce(|last, ch| {
+            match last {
+                i if i == &0 || i == ch => &0,
+                _ => ch,
+            }
+        }).unwrap();
+        if *ch != 0 {
+            println!("Found start-of-packet marker at {}", i + 4);
+            break;
+        }
+    }
 }
